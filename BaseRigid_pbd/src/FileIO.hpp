@@ -13,10 +13,20 @@ using namespace std;
 
 string fname = "positions_";
 
+int N = 2000;
+int fn;
 
 void writeToFile(int n_points, bool allowedToBreak) {
     ofstream location_out;
-    location_out.open(fname + to_string(n_points) + ".txt", std::ios::out | std::ios::app);
+    for (int i=0; i<N; i++) {
+        string file = fname + to_string(n_points) + "_" + to_string(i) + ".txt";
+        ifstream fin(file);
+        if(!fin) {
+            fn = i;
+            break;
+        }
+    }
+    location_out.open(fname + to_string(n_points) + "_" + to_string(fn) + ".txt", std::ios::out | std::ios::app);
     if (!location_out.is_open()) {
         cout << "Cannot open the file." << endl;
         return;
@@ -28,7 +38,7 @@ void writeToFile(int n_points, bool allowedToBreak) {
 
 void writeToFile(Real t, Real dt, int n_points) {
     ofstream location_out;
-    location_out.open(fname + to_string(n_points) + ".txt", std::ios::out | std::ios::app);
+    location_out.open(fname + to_string(n_points) + "_" + to_string(fn) + ".txt", std::ios::out | std::ios::app);
     if (!location_out.is_open()) {
         cout << "Cannot open the file." << endl;
         return;
@@ -39,7 +49,7 @@ void writeToFile(Real t, Real dt, int n_points) {
 
 void writeToFile(vector<Vec3f> pos, int n_points) {
     ofstream location_out;
-    location_out.open(fname + to_string(n_points) + ".txt", std::ios::out | std::ios::app);
+    location_out.open(fname + to_string(n_points) + "_" + to_string(fn) + ".txt", std::ios::out | std::ios::app);
     if (!location_out.is_open()) {
         cout << "Cannot open the file." << endl;
         return;

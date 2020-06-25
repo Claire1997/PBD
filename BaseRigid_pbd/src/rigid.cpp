@@ -87,10 +87,7 @@ public:
     I0(0, 0) = M * (height * height + depth * depth) / 12;
     I0(1, 1) = M * (width * width + depth * depth) / 12;
     I0(2, 2) = M * (height * height + width * width) / 12;
-    I0inv = Mat3f::I();
-    I0inv(0, 0) = 12 / (M * (height * height + depth * depth));
-    I0inv(1, 1) = 12 / (M * (width * width + depth * depth));
-    I0inv(2, 2) = 12 / (M * (height * height + width * width));
+    I0inv = I0.inverse();
     Iinv = I0inv;
 
     // vertices data (8 vertices)
@@ -236,7 +233,7 @@ public:
     // computeForceAndTorque();
 
     // TODO:
-    /* // Box
+    /* // simple Box demo
     body->V += _g * dt + body->F / body->M * dt;
     
     body->X += body->V * dt;
@@ -255,8 +252,7 @@ public:
 
 private:
   Mat3f computeR(Vec3f omega) {
-      Mat3f res = Mat3f::I();
-      
+      Mat3f res = Mat3f::zero();
       res(0, 0) = cos(omega[1]) * cos(omega[2]);
       res(0, 1) = -sin(omega[2]) * cos(omega[0]) + cos(omega[2]) * sin(omega[1]) * sin(omega[0]);
       res(0, 2) = sin(omega[0]) * sin(omega[2]) + cos(omega[2]) * sin(omega[1]) * cos(omega[0]);
