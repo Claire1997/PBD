@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/Users/claireqian/ENSTA/pre/PBD/BaseRigid_pbd/build",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++     -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk   -o CMakeFiles/rigid.dir/src/rigid.o -c /Users/claireqian/ENSTA/pre/PBD/BaseRigid_pbd/src/rigid.cpp",
+  "file": "/Users/claireqian/ENSTA/pre/PBD/BaseRigid_pbd/src/rigid.cpp"
+}
+]
