@@ -6,10 +6,11 @@
 #include "Matrix3x3.hpp"
 #include <vector>
 #include <iostream>
+#include <map>
 
 using namespace std;
 
-Real k_damping = 0.02;
+Real k_damping = 0.01;
 
 namespace calculations {
     Real sumM(vector<Real> M) {
@@ -54,6 +55,7 @@ namespace calculations {
             Mat3f I_temp_tr = Mat3f(0, r[2], -r[1], r[2], 0, -r[0], -r[1], r[0], 0);
             I += I_temp * I_temp_tr * M[i];
         }
+        
         cout << L << endl;
         I.printMat();
         Vec3f omega = I.inverse() * L;
@@ -66,5 +68,25 @@ namespace calculations {
     }
 }
 
+
+namespace mapCalculations {
+    bool mapContainsKeyValuePair(int i, int j, map<int, vector<int> > &map1) {
+        // always want i to be smaller than j for map iterations [removes the issue of duplicating elements when checking
+        if (j < i) { swap(i, j); }
+        if (map1.find(i) == map1.end()) {
+            return false;
+        }
+        vector<int> vectorAt = map1.at(i);
+        return (find(vectorAt.begin(), vectorAt.end(), j) == vectorAt.end());
+    }
+    
+    void addToMap(int i, int j, map<int, vector<int> > &map1) {
+        if (j < i) { swap(i, j); }
+        if ( mapContainsKeyValuePair(i, j, map1)) { throw; }
+        vector<int> adding = (map1.find(i) == map1.end()) ? vector<int>() : map1.at(i);
+        adding.push_back(j);
+        map1[i] = adding;
+    }
+}
 
 #endif  /* _CALCULATIONS_HPP_ */

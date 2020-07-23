@@ -40,6 +40,12 @@
 #include "Constraints.hpp"
 #include "FileIO.hpp"
 
+bool gPause = false;
+bool gSaveFile = false;
+int gGlutTime;                  // glut elapsed time
+int gSavedCnt = 0;
+
+
 struct BodyAttributes {
   BodyAttributes() :
     X(0, 0, 0), R(Mat3f::I()), P(0, 0, 0), L(0, 0, 0),
@@ -147,7 +153,7 @@ public:
         allConstraints = Constraints();
         allConstraints.createStretchConstraints(pos, M_POINT, allowedToBreak);
         cout<<"finished stretch constraints"<<endl;
-        writeToFile(n_points, allowedToBreak);
+        // writeToFile(n_points, allowedToBreak);
         writeToFile(pos, n_points);
     }
     
@@ -186,6 +192,9 @@ public:
   }
 
   void step() {
+      if (_step>1001) return;
+    // if (_step % 10==0) gSaveFile = true;
+    // else gSaveFile = false;
     std::cout << "t=" << _sim_t << " (dt=" << dt << ")" << std::endl;
       
     /// (5) for all vertices - update velocity by doing vi = vi + deltat*wi*fext(xi)
@@ -227,7 +236,7 @@ public:
 
 
     // write to file
-    writeToFile(_sim_t, dt, body->n_points);
+    // writeToFile(_sim_t, dt, body->n_points);
     writeToFile(body->pos, body->n_points);
       
     // computeForceAndTorque();
@@ -285,11 +294,6 @@ private:
 Box abox(2.0, 1.0, 1.0);
 String astring(10);
 RigidSolver solver(&astring);
-
-bool gPause = false;
-bool gSaveFile = false;
-int gGlutTime;                  // glut elapsed time
-int gSavedCnt = 0;
 
 // simple rendering
 void render() {
