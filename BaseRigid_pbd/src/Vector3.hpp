@@ -110,10 +110,16 @@ public:
   T lengthSquare() const { return (x*x + y*y + z*z); }
   T distanceTo(const Vector3 &t) const { return (*this-t).length(); }
   T distanceSquareTo(const Vector3 &t) const { return (*this-t).lengthSquare(); }
+  Vector3<T> norm() const {return (*this/length());}
   
   Vector3<T> cross(const Vector3<T> r) {
     return Vector3<T> (y*r.z-r.y*z, z*r.x-r.z*x, x*r.y-y*r.x);
   }
+    
+  Real dot(const Vector3<T> r) {
+      return (x*r.x+y*r.y+z*r.z);
+  }
+    
 
   friend std::istream& operator>>(std::istream &in, Vector3 &vec) {
     return (in >> vec.x >> vec.y >> vec.z);

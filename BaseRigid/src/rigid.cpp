@@ -134,7 +134,7 @@ class RigidSolver {
 public:
   explicit RigidSolver(
     Box *body0,   // BodyAttributes *body0,
-    const Real dt=0.01, const Vec3f g=Vec3f(0, 0, 0)) :
+    const Real dt=0.01, const Vec3f g=Vec3f(0, -0.1, 0)) :
     body(body0), dt(dt), _g(g), _step(0), _sim_t(0) {
   }
 

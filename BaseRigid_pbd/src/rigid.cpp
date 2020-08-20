@@ -80,6 +80,7 @@ struct BodyAttributes {
   std::vector<Vec3f> vdata0;
 };
 
+/*
 class Box : public BodyAttributes {
 public:
   explicit Box(
@@ -136,6 +137,128 @@ public:
   Real width, height, depth;
 };
 
+*/
+
+static const GLint index_list[][2] =
+{
+    {0, 1},
+    {2, 3},
+    {4, 5},
+    {6, 7},
+    {0, 3},
+    {1, 2},
+    {4, 7},
+    {5, 6},
+    {0, 4},
+    {1, 5},
+    {7, 3},
+    {2, 6}
+};
+
+class Box: public BodyAttributes {
+public:
+    int n_points = 8;
+    Real width, height, depth; // x, y, z
+    std::vector<Vec3f> V_POINT;
+    std::vector<Real> M_POINT;
+    std::vector<Vec3f> pos;
+    std::vector<Vec3f> projected;
+    std::vector<Face*> faces;
+    Constraints allConstraints;
+    map<int, vector<int> > brokenEdges;
+   
+    explicit Box(Real w, Real he, Real de):  width(w), height(he), depth(de) {
+        // vertices data (8 vertices)
+        sim.numParticles = n_points;
+        pos.push_back(Vec3f(-0.5*w, -0.5*he, -0.5*de));
+        pos.push_back(Vec3f( 0.5*w, -0.5*he, -0.5*de));
+        pos.push_back(Vec3f( 0.5*w,  0.5*he, -0.5*de));
+        pos.push_back(Vec3f(-0.5*w,  0.5*he, -0.5*de));
+        pos.push_back(Vec3f(-0.5*w, -0.5*he,  0.5*de));
+        pos.push_back(Vec3f( 0.5*w, -0.5*he,  0.5*de));
+        pos.push_back(Vec3f( 0.5*w,  0.5*he,  0.5*de));
+        pos.push_back(Vec3f(-0.5*w,  0.5*he,  0.5*de));
+        for (int i=0;i<n_points;i++) {
+            V_POINT.push_back(Vec3f(0, 0, 0));
+            M_POINT.push_back(1.0);
+            projected.push_back(Vec3f(0, 0, 0));
+        }
+        M_POINT[0] = 0.0; // fixed
+        int f[12][3] = {
+            {0,1,2}, {0,2,3},
+            {0,3,7}, {0,7,4},
+            {4,5,6}, {4,6,7},
+            {1,2,6}, {1,6,5},
+            {0,1,5}, {0,5,4},
+            {2,3,7}, {2,7,6}
+        };
+        //通过数组a的地址初始化，注意地址是从0到3（左闭右开区间）
+        for (int i=0; i<12; i++) {
+            vector<int> b = vector<int>();
+            for (int j=0; j<3; j++) {
+                b.push_back(f[i][j]);
+            }
+            faces.push_back(new Face(b, faces.size()) );
+        }
+        calculateAdjacentFaces();
+        // [removes the issue of checking based on duplicate edgings in the map - i,j and j,i]
+        brokenEdges = map<int, vector<int> >();
+        bool allowedToBreak = false;
+        /// setup overall constraints
+        allConstraints = Constraints();
+        allConstraints.createStretchConstraints(faces, pos, M_POINT, allowedToBreak);
+        cout<<"finished stretch constraints"<<endl;
+        allConstraints.createFaceBendingConstraints(faces, pos, M_POINT, allowedToBreak);
+        cout<<"finished facebend constraints"<<endl;
+        // writeToFile(n_points, allowedToBreak);
+        writeToFile(pos, n_points);
+    }
+    
+    void calculateAdjacentFaces(){
+        vector<vector<int> > check(faces.size(), vector<int>(faces.size()));
+        for(int i=0; i<faces.size(); i++) {
+            for(int j=0; j<faces.size(); j++){
+                check[i][j] = 0;
+            }
+        }
+        for (int i = 0; i < faces.size(); ++i) {
+            for (int j = 0; j < faces.size(); ++j) {
+                if (i != j && check[i][j] != 1) {
+                    check[i][j] = 1;
+                    check[j][i] = 1;
+                    if ( faces[i]->shouldBeAdjacentToFace(faces[j]) ) {
+                        faces[j]->shouldBeAdjacentToFace(faces[i]);
+                    }
+                }
+            }
+        }
+    }
+                                  
+    virtual void renderGl() const {
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+
+        // Render the vertices
+        int i,j;
+        glBegin(GL_LINES);
+        for(i=0; i<12; ++i) // 12 条线段
+            
+        {
+            for(j=0; j<2; ++j) // 每条线段 2个顶点
+                
+            {
+                GLfloat point[] = {pos[index_list[i][j]][0],pos[index_list[i][j]][1],pos[index_list[i][j]][2]};
+                //cout<< i << " " << j << " " << pos[index_list[i][j]][0]<<endl;
+                glVertex3fv(point);
+            }
+        }
+        glEnd();
+    
+        glPopMatrix();
+    }
+    
+};
+/*
 class String: public BodyAttributes {
 public:
     explicit String(int n): n_points(n) {
@@ -176,45 +299,49 @@ public:
     std::vector<Vec3f> projected;
     Constraints allConstraints;
 };
+ 
+ */
 
 class RigidSolver {
 public:
   explicit RigidSolver(
-    String *body0,   // BodyAttributes *body0,
-    const Real dt=0.01, const Vec3f g=Vec3f(0, -9.8, 0)) :
+    // String *body0,   // BodyAttributes *body0,
+    Box *body0,
+    const Real dt=0.01, const Vec3f g=Vec3f(0, -0.1, 0)) :
     body(body0), dt(dt), _g(g), _step(0), _sim_t(0) {
   }
 
-  void initScene(String *body0) { // BodyAttributes *body0
+  void initScene(Box *body0) { // BodyAttributes *body0
     body = body0;
     _step = 0;
     _sim_t = 0;
   }
 
   void step() {
-      if (_step>1001) return;
+      
+      if (_step>10001) return;
     // if (_step % 10==0) gSaveFile = true;
     // else gSaveFile = false;
     std::cout << "t=" << _sim_t << " (dt=" << dt << ")" << std::endl;
       
     /// (5) for all vertices - update velocity by doing vi = vi + deltat*wi*fext(xi)
     // for string we only consider the gravity
-      for (int i=1;i<body->n_points;i++) {
+      for (int i=1;i<body->n_points;i++) { // first point fixed
           body->V_POINT[i] += _g * dt;
           std::cout << "velocity " << body->V_POINT[i] << std::endl;
       }
       
     /// (6) dampVelocites(v1,...vN)
+     
     if (_step>0) calculations::dampVelocities(body->pos, body->V_POINT, body->M_POINT);
     else calculations::dampVelocities_simple(body->V_POINT);
       
-    for (int i=1;i<body->n_points;i++) {
-        // body->pos[i] += body->V_POINT[i] * dt;
-        std::cout << "pos " << body->pos[i] << std::endl;
+    for (int i=0;i<body->n_points;i++) {
+        std::cout << "pos " << i << body->pos[i] << std::endl;
     }
     
     /// (7) for all verticies i find projected point assuming no collisions pi = xi + deltat vi
-    for (int i=1;i<body->n_points;i++) { // the first point will not move
+    for (int i=0;i<body->n_points;i++) { // the first point will not move
         body->projected[i] = body->pos[i] + body->V_POINT[i] * dt;
     }
     
@@ -223,40 +350,29 @@ public:
 
     /// (9) loop the solver the number of desired iterations projecting the constraints
     for (int i = 0; i < body->allConstraints.constraintIterations; i++) {
-        body->allConstraints.update(body->projected);// , brokenEdges); //!!!!
+        body->allConstraints.update(body->projected, body->brokenEdges); //!!!!
     }
       
     /// (12) for all vertices update vi and xi for next overall loop simulation step
-    for (int i=1;i<body->n_points;i++) {
+    for (int i=1;i<body->n_points;i++) { // first point
         body->V_POINT[i] = (body->projected[i] - body->pos[i]) / dt;
     }
     body->pos = body->projected;
 
     /// (16) velocities update (for friction etc - only on particles involved in this iterations collisions)
-
-
+      // since collision constraints are the last to be updated in allConstraints update - dont need to reconstrain here
+    // body->allConstraints.updateVelocitiesOfCollisions(body->V_POINT);
+      
     // write to file
     // writeToFile(_sim_t, dt, body->n_points);
     writeToFile(body->pos, body->n_points);
-      
-    // computeForceAndTorque();
-
-    // TODO:
-    /* // simple Box demo
-    body->V += _g * dt + body->F / body->M * dt;
-    
-    body->X += body->V * dt;
-    
-    body->omega += body->Iinv * body->tau * dt;
-    
-    body->R = computeR(body->omega);
-     */
-      
+     
     ++_step;
     _sim_t += dt;
+      
   }
 
-  String *body; // BodyAttributes *body;
+  Box *body; // BodyAttributes *body;
   Real dt;                      // simulation time and time step size
 
 private:
@@ -291,17 +407,17 @@ private:
   Real _sim_t;                  // simulation time
 };
 
-Box abox(2.0, 1.0, 1.0);
-String astring(10);
-RigidSolver solver(&astring);
+Box abox(0.8, 1.2, 0.8);
+// String astring(10);
+RigidSolver solver(&abox);
 
 // simple rendering
 void render() {
   glClearColor(.4f, .4f, .4f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
-
+    
   glLoadIdentity();
-  gluLookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+  gluLookAt(0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 
   glColor3f(1.0, 1.0, 1.0);
   solver.body->renderGl();
