@@ -150,7 +150,7 @@ public:
         allConstraints = Constraints();
         allConstraints.createStretchConstraints(faces, pos, M_POINT, allowedToBreak);
         cout<<"finished stretch constraints"<<endl;
-        allConstraints.createFaceBendingConstraints(faces, pos, M_POINT, allowedToBreak);
+        // allConstraints.createFaceBendingConstraints(faces, pos, M_POINT, allowedToBreak);
         cout<<"finished facebend constraints"<<endl;
         // writeToFile(n_points, allowedToBreak);
         writeToFile(pos, n_points);
