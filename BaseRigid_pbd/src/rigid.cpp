@@ -80,64 +80,6 @@ struct BodyAttributes {
   std::vector<Vec3f> vdata0;
 };
 
-/*
-class Box : public BodyAttributes {
-public:
-  explicit Box(
-    const Real w=1.0, const Real h=1.0, const Real d=1.0,
-    const Vec3f v0=Vec3f(0, 0, 0), const Vec3f omega0=Vec3f(0, 0, 0)) :
-    width(w), height(h), depth(d) {
-
-    // TODO:
-    M = 100.0;
-    I0 = Mat3f::I();
-    I0(0, 0) = M * (height * height + depth * depth) / 12;
-    I0(1, 1) = M * (width * width + depth * depth) / 12;
-    I0(2, 2) = M * (height * height + width * width) / 12;
-    I0inv = I0.inverse();
-    Iinv = I0inv;
-
-    // vertices data (8 vertices)
-    vdata0.push_back(Vec3f(-0.5*w, -0.5*h, -0.5*d));
-    vdata0.push_back(Vec3f( 0.5*w, -0.5*h, -0.5*d));
-    vdata0.push_back(Vec3f( 0.5*w,  0.5*h, -0.5*d));
-    vdata0.push_back(Vec3f(-0.5*w,  0.5*h, -0.5*d));
-
-    vdata0.push_back(Vec3f(-0.5*w, -0.5*h,  0.5*d));
-    vdata0.push_back(Vec3f( 0.5*w, -0.5*h,  0.5*d));
-    vdata0.push_back(Vec3f( 0.5*w,  0.5*h,  0.5*d));
-    vdata0.push_back(Vec3f(-0.5*w,  0.5*h,  0.5*d));
-  }
-
-  virtual void renderGl() const {
-    glPushMatrix();
-
-    float mat[] = {              // OpenGL is column major
-      R(0,0), R(1,0), R(2,0), 0, // column 0
-      R(0,1), R(1,1), R(2,1), 0, // column 1
-      R(0,2), R(1,2), R(2,2), 0, // column 2
-      X[0],   X[1],   X[2],   1  // column 3
-    };
-    glMultMatrixf(mat);         // M
-
-    // Render the vertices
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glPointSize(5);
-    glVertexPointer(3, GL_FLOAT, sizeof(Vec3f), &vdata0[0]);
-    glDrawArrays(GL_POINTS, 0, vdata0.size());
-    glDisableClientState(GL_VERTEX_ARRAY);
-
-    glScalef(width, height, depth); // MS
-    glutWireCube(1.0);              // MSx
-
-    glPopMatrix();
-  }
-
-  // rigid body property
-  Real width, height, depth;
-};
-
-*/
 
 static const GLint index_list[][2] =
 {
@@ -241,12 +183,8 @@ public:
         // Render the vertices
         int i,j;
         glBegin(GL_LINES);
-        for(i=0; i<12; ++i) // 12 条线段
-            
-        {
-            for(j=0; j<2; ++j) // 每条线段 2个顶点
-                
-            {
+        for(i=0; i<12; ++i){
+            for(j=0; j<2; ++j){
                 GLfloat point[] = {pos[index_list[i][j]][0],pos[index_list[i][j]][1],pos[index_list[i][j]][2]};
                 //cout<< i << " " << j << " " << pos[index_list[i][j]][0]<<endl;
                 glVertex3fv(point);

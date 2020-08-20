@@ -27,55 +27,7 @@ public:
     int constraintIterations = 10;
 };
 
-/*
-class StretchConstraint : public Constraint {
-protected:
-    /// parental items
-    // bool remove;
-    // bool allowedToBreak;
-public:
-    int pi_index;
-    int pj_index;
-    
-    Real originalLength;
-    Real wi;
-    Real wj;
-    
-    StretchConstraint(Real inputLen, Real inputwi, Real inputwj, int inputpi_index, int inputpj_index, bool inputAllowedToBreak)
-    : Constraint(inputAllowedToBreak), pi_index(inputpi_index), pj_index(inputpj_index), originalLength(inputLen), wi(inputwi), wj(inputwj) {}
-    
-    ~StretchConstraint() { Constraint::~Constraint(); }
-    
-    virtual void update(vector<Vec3f> &p), map<int, vector<int>>& broken) {
-        // check if any fixed points - then dont do constraints calculations
-        if (wi == 0 && wj == 0) { return; }
-        if (allowedToBreak && (remove || mapCalculations::mapContainsKeyValuePair(pi_index, pj_index, broken))) { remove = true; return; }
-        Vec3f piMinpj = p[pi_index] - p[pj_index];
-        Real len = piMinpj.length();
-        if (len == 0) {
-            cout << "prevent dividing by zero: length is 0 error in calculations.cpp" << pi_index << pj_index << endl;
-            throw;
-        }
-        
-        Real diff = len - originalLength;
-        
-        if (allowedToBreak && diff > 1.5 * originalLength) {
-            mapCalculations::addToMap(pi_index, pj_index, broken);
-        }
-        
-        Vec3f updateValue = diff * piMinpj / ((wi + wj) * len);
-        // compression or stretching stiffness
-        Real stiffness = (len < originalLength) ? compressionStiffness : stretchingStiffness;
-        stiffness = 1 - pow((1 - stiffness), constraintIterations);
-        if (pi_index==0) {
-            p[pj_index] += (wi + wj) * updateValue * (stiffness);
-        }else {
-            p[pi_index] += -wi * updateValue * (stiffness);
-            p[pj_index] += wj * updateValue * (stiffness);
-        }
-    }
-};
-*/
+
 
 class StretchConstraint : public Constraint {
 protected:
@@ -194,11 +146,9 @@ public:
         
         for (int i = 0; i < 4; ++i) {
             p[facesIndices[i]] +=  - w[i] * weighting * q[i];
-           // if (testing) {
-                for (int test_i = 0; test_i < 3; ++test_i) {
-                    if ( isnan(p[facesIndices[i]][test_i]) ) { throw; }
-                }
-            // }
+            for (int test_i = 0; test_i < 3; ++test_i) {
+                if ( isnan(p[facesIndices[i]][test_i]) ) { throw; }
+            }
         }
     }
 };
@@ -268,7 +218,7 @@ public:
             if (Cp < 0) {
                 p[index] += (-Cp * 1 * nc);
             }
-        } // else { if (testing) { throw; }}
+        }
     }
     
  };
