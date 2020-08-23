@@ -10,11 +10,12 @@ def import_data():
     print (data)
     X = data[0:1002, :]
     Y = data[1:1003, :]
+    x_int = X[0, :]
     X = tf.convert_to_tensor(X, dtype=tf.float32)
     Y = tf.convert_to_tensor(Y, dtype=tf.float32)
     # print (data)
     # print(Y)
-    return X,Y
+    return (X,Y,x_int)
 
 # import_data()
     
